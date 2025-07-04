@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For My Home</title>
+  <style>
+    body {
+      margin: 0;
+      background: #b2d8e3;
+      font-family: 'Patrick Hand', cursive;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+      color: #7182e1;
+    }
+
+    .book-container {
+      perspective: 2000px;
+      margin-top: 30px;
+    }
+
+    .book {
+      width: 90vw;
+      max-width: 600px;
+      height: 75vh; /* Gunakan tinggi berdasarkan layar */
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    .page {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: url('https://i.imgur.com/yDYdi49.png') no-repeat center/cover;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      backface-visibility: hidden;
+      transform-origin: left;
+      transform-style: preserve-3d;
+      padding: 16px;
+      box-sizing: border-box;
+      transition: transform 1s ease;
+      overflow-y: auto;
+    }
+
+    .page.flipped {
+      transform: rotateY(-180deg);
+      z-index: 0 !important;
+    }
+
+    .nav-buttons {
+      margin-top: 20px;
+    }
+
+    button {
+      background: #254067;
+      color: white;
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .content {
+      max-width: 90%;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.8);
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+canvas {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border: 2px solid #aaa;
+  border-radius: 8px;
+  display: block;
+  margin: auto;
+}
+
+  </style>
+</head>
+<body>
+
+<h1>Untuk Bocilnya kaka</h1>
+
+<audio id="bgm" src="adeeee/Waiting for You.mp3" loop></audio>
+
+<div class="book-container">
+  <div class="book" id="book">
+    <!-- Halaman akan dibuat otomatis -->
+  </div>
+</div>
+
+<div id="toast" style="
+  visibility: hidden;
+  min-width: 250px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 16px;
+  position: fixed;
+  z-index: 999;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  font-size: 16px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  transition: visibility 0.5s, opacity 0.5s ease;
+  opacity: 0;
+"></div>
+
+
+<div class="nav-buttons">
+  <button onclick="prevPage()">⬅ Prev</button>
+  <button onclick="nextPage()">Next ➡</button>
+</div>
+
+<script>
+  const book = document.getElementById("book");
+  const totalPages = 10;
+  let currentPage = 0;
+
+  // Membuat halaman satu per satu
+  for (let i = 1; i <= totalPages; i++) {
+  const page = document.createElement("div");
+  page.className = "page";
+  page.style.zIndex = totalPages - i;
+
+  // Atur background khusus hanya untuk halaman 1
+  if (i === 1) {
+    page.style.backgroundImage = "url('adeeee/pembuka.jpg')"; // Ganti sesuai file kamu
+    page.style.backgroundSize = "cover";
+    page.style.backgroundPosition = "center";
+    page.innerHTML = `
+      <div class="content" style="background: rgba(255,255,255,0.85); border-radius: 12px; padding: 20px; text-align:center;">
+        <h2 style="color:#e75480; font-size:26px;">🌸 Halooo bocillll 🌸</h2>
+        <p style="font-size:18px; margin-top:10px;">
+          Welcome to <strong>hasil gabutnya kakaaa</strong> 😅<br>
+          Meski hasil gabut tapi buatnya make hati tauuu. Setiap halamannyaa aku buat khusus buat adeeee, semisal adee lagi bosen, adee tinggal buka ini ajaa siapa tau bosennya adee jadi ilang, hehehe
+        </p>
+        <p style="font-size:16px; margin-top:15px;">Setiap halaman isinya beda beda, walaupun adee bakal ngerasa aneh juga pas ngeliat, hehe...<br><br>Tapi semoga kamu suka yaaa 💗</p>
+        <p style="font-size:28px;">💌</p>
+      </div>
+    `;
+  } else if (i === 2) {
+  page.style.backgroundImage = "url('adeeee/kedua.avif')";
+  page.style.backgroundSize = "cover";
+  page.style.backgroundPosition = "center";
+  page.innerHTML = `
+    <div class="content" style="background: rgba(255,255,255,0.85); border-radius: 12px; padding: 20px;">
+      <h2 style="color:#ff69b4; font-size:26px;">💡 Fun Facts 💡</h2>
+      <ul style="font-size:17px; line-height:1.6; padding-left: 20px;">
+        <li>🙏 Awal aku nge dm kamu, aku ngiranya kamu itu cowo</li>
+        <li>🤣 Kamu keliatannya aja dewasa, padahal mah kelakuannya masih bocil</li>
+        <li>💬 Chat random kamu suka bikin aku senyum senyum sendiri tauuuu</li>
+        <li>🫶 Kamu bisa bikin aku tenang disaat aku lagi ga jelas</li>
+        <li>🤏 Kecilnya tangan kamu itu ga sesuai sama yang aku kira(kecil banget oyyyy)</li>
+        <li>❤️‍🔥 Kamu suka ngambek, tapi kamu lucu kalo lagi gituuu</li>
+        <li>🤭 Aku suka nahan salting kalo lagi deket adee</li>
+        <li>😱 Kadang kamu itu suka keliat jadi beda orang</li>
+      </ul>
+      <p style="margin-top:20px; text-align:center; font-size:18px;">Aku suka apapun tentang kamu 💞</p>
+    </div>
+  `;
+  
+  } else if (i === 3) {
+  page.style.backgroundImage = "url('adeeee/batman.jpg')"; // boleh diganti dengan background Gotham aesthetic lucu
+  page.style.backgroundSize = "cover";
+  page.style.backgroundPosition = "center";
+  page.innerHTML = `
+    <div class="content" style="background: rgba(255,255,255,0.92); border-radius: 12px; padding: 20px; font-size: 16.5px;">
+      <h2 style="color:#343a40; font-size:24px;">🦇 Kalo kaka jadi Batman dan ade jadi Batwoman 🦇</h2>
+      <p style="line-height: 1.8;">
+      Kota Gotham malam itu penuh hujan, tapi hati kaka lebih penuh... penuh rindu karna belom liat ade lagi 🙃
+      <br><br>
+      Di atas gedung tertinggi, Batman — alias kakaa — menatap lampu-lampu kota sambil makan cimol, berharap Batwoman datang...
+      <br><br>
+      Lalu BOOM 💥! Dari asap muncul siluet kecil dengan hoodie pink — itu dia, Batwoman! Tapi dengan ekspresi jutek karena kakaa bangunnya kesiangan 😔
+      <br><br>
+      “Kamu gak pernah serius ya...” katanya.
+      <br>
+      “Aku serius... sama adee,” jawab kakaa, sambil ngeluarin foto kita dari sabuk Batbelt 😭📸
+      <br><br>
+      Kita nggak jadi ngelawan penjahat malam itu. Kita duduk di rooftop, ngobrolin masa depan — tentang rumah kucing, curut curut, dan warung indomie 24 jam 🐱🍜
+      <br><br>
+      Gotham bisa tunggu. Karena malam itu, cinta kita lebih penting dari kriminal manapun 🖤
+
+      </p>
+    </div>
+  `;
+  } else if (i === 4) {
+  page.style.backgroundImage = "url('adeeee/tebak.jpg')"; // boleh diganti dengan background Gotham aesthetic lucu
+  page.style.backgroundSize = "cover";
+  page.style.backgroundPosition = "center";
+  page.innerHTML = `
+    <div class="content" style="background: rgba(255,255,255,0.93); border-radius: 12px; padding: 20px;">
+      <h2 style="color:#e84393;">❤️ Quiz: Seberapa tau adee</h2>
+      <div style="margin-top: 15px;">
+        <p><strong>1. Hari apa waktu pertama kali kita saling ngobrol secara langsung?</strong></p>
+        <button onclick="checkAnswer(this, true, ' Cieee meluk tembok 🤭', 'salah, coba lagi!')">Kamis</button>
+        <button onclick="checkAnswer(this, false, '', ' Parah ga inget 😒')">Senin</button>
+        <button onclick="checkAnswer(this, false, '', 'Ihhh masa lupa siii 😔')">Rabu</button>
+
+        <p><strong>2. Tanggal berapa aku nembak adee?</strong></p>
+        <button onclick="checkAnswer(this, false, '', ' yeuuuuuu ')">01-05-2025</button>
+        <button onclick="checkAnswer(this, true, ' anjayyyy tangalnyaa bagussss ')">25-05-2025</button>
+        <button onclick="checkAnswer(this, false, '', 'hmmmmmmmm')">10-05-2025</button>
+
+        <p><strong>3. Di acara apa waktu kita pertama kali potbar?</strong></p>
+        <button onclick="checkAnswer(this, false,'', 'Belom kenalan kita oyyy')">Perayaan hari kemerdekaan</button>
+        <button onclick="checkAnswer(this, false,'', 'Inimah judul film')">Perayaan mati rasa</button>
+        <button onclick="checkAnswer(this, true, 'Omaygattt inget dia gesss')">Perayaan hari guru</button> 
+        
+        <p><strong>4. Siapa yang paling susah makan diantara kita?</strong></p>
+        <button onclick="checkAnswer(this, true, 'iyaa dong jelasss 😝')">Adeeee</button>
+        <button onclick="checkAnswer(this, true, 'sangat rill oyyy 😁')">Bocilnya kakaa</button>
+        <button onclick="checkAnswer(this, true, 'fakta banget inimah 😏')">Aurelia</button>
+
+        <div id="quiz-result" style="margin-top: 20px; font-weight: bold;"></div>
+      </div>
+    </div>
+  `;
+  } else if (i === 5) {
+    page.style.backgroundImage = "url('adeeee/kenangan.jpg')"; // opsional
+    page.style.backgroundSize = "cover";
+    page.style.backgroundPosition = "center";
+    page.innerHTML = `
+      <div class="content" style="text-align:center;">
+        <h2 style="color:#e84393;">📷 Memory</h2>
+        <div class="slider-wrapper" style="position:relative; max-width:100%; margin-top:20px;">
+          <img class="galeri-slide" src="adeeee/dm.jpeg" style="max-height:300px; width:auto; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.2); display:block; margin:auto;">
+          <img class="galeri-slide" src="adeeee/halaman5.jpeg" style="max-height:300px; width:auto; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.2); display:block; margin:auto;">
+          <img class="galeri-slide" src="adeeee/fo.jpeg" style="max-height:300px; width:auto; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.2); display:block; margin:auto;">
+        
+          <div id="galeri-caption" style="margin-top:15px; font-style:italic; color:#555;">Waktu kita pertama kali jalan bareng 🥺</div>
+
+          <button onclick="prevGaleri()" style="position:absolute; top:50%; left:0; transform:translateY(-50%); background:#e84393; color:white; border:none; border-radius:50%; width:40px; height:40px; font-size:20px;">❮</button>
+          <button onclick="nextGaleri()" style="position:absolute; top:50%; right:0; transform:translateY(-50%); background:#e84393; color:white; border:none; border-radius:50%; width:40px; height:40px; font-size:20px;">❯</button>
+        </div>
+      </div>
+  `;
+  } else if (i === 6) {
+  page.style.backgroundImage = "url('adeeee/nyusunnya.jpg')";
+  page.style.backgroundSize = "cover";
+  page.style.backgroundPosition = "center";
+  page.innerHTML = `
+    <div class="content" style="text-align:center;">
+      <h2 style="color:#6c5ce7;">🧩 Puzzle Time!</h2>
+      <p style="font-size:15px; margin-bottom:15px;">Susun puzzlenya yaa cilll</p>
+      <canvas id="puzzleCanvas" width="300" height="225" style="border:2px solid #aaa; border-radius:8px;"></canvas>
+
+      <div style="margin-top:10px;">
+        <button id="shuffleBtn" style="padding:8px 15px; background:#6c5ce7; color:white; border:none; border-radius:5px;">🔀 Acak Ulang</button>
+      </div>
+    </div>
+  `;
+
+  // ✅ Tambahkan script puzzle SETELAH canvas dibuat
+  setTimeout(() => {
+  const canvas = document.getElementById("puzzleCanvas");
+  if (!canvas) return console.warn("Canvas belum tersedia");
+
+  const ctx = canvas.getContext("2d");
+  const rows = 5, cols = 5;
+  let pieces = [];
+  let pieceW, pieceH;
+  let firstPick = null;
+
+  const puzzleImage = new Image();
+  puzzleImage.src = "adeeee/puzzle.jpeg";
+
+  const prankImage = new Image();
+  prankImage.src = "adeeee/prank.jpeg";
+
+  puzzleImage.onload = () => {
+    canvas.width = puzzleImage.width;
+    canvas.height = puzzleImage.height;
+
+    pieceW = canvas.width / cols;
+    pieceH = canvas.height / rows;
+
+    // Inisialisasi puzzle
+    initPuzzle();
+    drawPuzzle();
+
+    // Klik canvas
+    canvas.addEventListener("click", handlePuzzleClick);
+
+    // Tombol shuffle
+    document.getElementById("shuffleBtn").onclick = shufflePuzzle;
+  };
+
+  function initPuzzle() {
+    pieces = [];
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        pieces.push({
+          correctRow: row,
+          correctCol: col,
+          currentRow: row,
+          currentCol: col
+        });
+      }
+    }
+    shufflePuzzle();
+  }
+
+  function shufflePuzzle() {
+    // Acak currentRow dan currentCol
+    for (let i = pieces.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pieces[i].currentRow, pieces[j].currentRow] = [pieces[j].currentRow, pieces[i].currentRow];
+      [pieces[i].currentCol, pieces[j].currentCol] = [pieces[j].currentCol, pieces[i].currentCol];
+    }
+    drawPuzzle();
+  }
+
+  function drawPuzzle() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const piece of pieces) {
+      const sx = piece.correctCol * pieceW;
+      const sy = piece.correctRow * pieceH;
+      const dx = piece.currentCol * pieceW;
+      const dy = piece.currentRow * pieceH;
+
+      ctx.drawImage(puzzleImage, sx, sy, pieceW, pieceH, dx, dy, pieceW, pieceH);
+    }
+  }
+
+  function handlePuzzleClick(e) {
+  const rect = canvas.getBoundingClientRect();
+
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+
+  const clickedCol = Math.floor(x / pieceW);
+  const clickedRow = Math.floor(y / pieceH);
+
+  const clickedPiece = pieces.find(p =>
+    p.currentCol === clickedCol && p.currentRow === clickedRow
+  );
+
+  if (!clickedPiece) return;
+
+  if (!firstPick) {
+    firstPick = clickedPiece;
+  } else {
+    // Tukar posisi
+    const tempRow = firstPick.currentRow;
+    const tempCol = firstPick.currentCol;
+    firstPick.currentRow = clickedPiece.currentRow;
+    firstPick.currentCol = clickedPiece.currentCol;
+    clickedPiece.currentRow = tempRow;
+    clickedPiece.currentCol = tempCol;
+
+    firstPick = null;
+    drawPuzzle();
+
+    if (isPuzzleSolved()) {
+  // Tambahkan efek blur dulu
+  canvas.style.filter = "blur(5px)";
+
+  setTimeout(() => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.style.filter = "none"; // Hapus blur agar prank jelas
+    ctx.drawImage(prankImage, 0, 0, canvas.width, canvas.height);
+
+    setTimeout(() => {
+      alert("ehhh koo jadii gini yaakkkk 😝");
+    }, 300); // muncul setelah gambar prank tampil
+  }, 800); // waktu delay efek blur
+}
+    }
+  }
+
+  function isPuzzleSolved() {
+    return pieces.every(p => p.currentRow === p.correctRow && p.currentCol === p.correctCol);
+  }
+}, 100); // 🔁 Tunggu 100ms agar canvas benar-benar terpasang
+} else if (i === 7) {
+  page.style.backgroundImage = "url('adeeee/quotes.jpg')"; // Ganti dengan background scrapbook estetik
+  page.style.backgroundSize = "cover";
+  page.style.backgroundPosition = "center";
+  page.innerHTML = `
+    <div class="content" style="background: rgba(255,255,255,0.88); padding: 25px; border-radius: 12px;">
+      <h2 style="color:#ff6f91; text-align:center;">💬 Kaka mode ahli quotes 😁</h2>
+      <div style="margin-top:20px; font-size:16.5px; line-height:1.8; display: flex; flex-direction: column; gap: 15px;">
+        <blockquote style="background:#ffe3f1; border-left:5px solid #ff6f91; padding: 10px 15px; border-radius: 8px;">"Aku ngga akan nyari yang sempurna, aku nyari yang mau ngebentuk kesempurnaan, dan itu cuma adee 😱"</blockquote>
+        <blockquote style="background:#e0f7fa; border-left:5px solid #00bcd4; padding: 10px 15px; border-radius: 8px;">"Kalo ade tanya aku butuh apa buat setiap keseharian aku, jawabannya sederhana: aku cuma butuh senyuman tulus dari adee 🫣"</blockquote>
+        <blockquote style="background:#fef9e7; border-left:5px solid #f4d03f; padding: 10px 15px; border-radius: 8px;">"Aku rela berubah jadi gelang yang selalu ade pake, biar aku bisa selalu deket sama adee 🤫"</blockquote>
+        <blockquote style="background:#fce4ec; border-left:5px solid #ec407a; padding: 10px 15px; border-radius: 8px;">"Aku ga bisa pastiin kalo aku bakal jadi yang terbaik buat adee, tapi aku bakal usahain buat selalu ada disaat ade butuh 😎"</blockquote>
+        <blockquote style="background:#f3e5f5; border-left:5px solid #ab47bc; padding: 10px 15px; border-radius: 8px;">"Kamu itu bukan hanya indah, tapi juga alasan kenapa hari hari aku selalu penuh warna 🫶"</blockquote>
+      </div>
+    </div>
+  `;
+} else if (i === 8) {
+  page.style.backgroundImage = "url('adeeee/longlong.jpg')"; // Ganti dengan background diary lucu atau vintage
+  page.style.backgroundSize = "cover";
+  page.style.backgroundPosition = "center";
+  page.innerHTML = `
+    <div class="content" style="background: rgba(255,255,255,0.92); border-radius: 12px; padding: 25px; font-family: 'Georgia', serif; font-size: 16.5px; line-height: 1.9;">
+      <h2 style="color:#c44569; text-align:center;">📖 Buat Adeeee</h2>
+      <p style="text-indent: 24px;">
+        Dear bocil kesayangan kakaa... 🥹
+      </p>
+      <p>
+        Kadang aku suka mikir sendiri...
+
+Gimana caranya seseorang bisa bikin aku senyaman ini, padahal kita ga selalu bareng tiap waktu? Gimana caranya satu chat dari kamu bisa bikin senyum aku muncul, walaupun aku lagi capek banget sama lingkungan sekitar?
+
+Aku bukan orang yang gampang cerita. Tapi sama kamu... rasanya pengen aja ngomong, walaupun kadang bingung harus mulai dari mana.
+
+Ada hal hal yang ga pernah aku tunjukkin ke orang lain, tapi kamu malah bisa liat itu tanpa aku harus jelasin.
+
+Kadang aku suka malu sendiri kalo inget gimana aku bersikap di depan kamu. Kayak... sok cuek, padahal peduli banget. Sok santai, padahal deg degan tiap kali kamu ngeliat aku lebih dari 3 detik 😳
+
+Aku ga tau harus gimana nyusun kata kata yang rapi. Tapi satu hal yang pasti: aku bersyukur kamu ada di hidup aku.
+
+Aku gak berani janji banyak banyak. Tapi aku selalu punya niat buat jagain kamu dengan cara aku sendiri. Walaupun aku banyak kurang, aku gak akan berhenti belajar buat bisa semakin ngertiin kamu.
+
+Karna kamu... bukan cuma seseorang yang aku suka.
+Kamu itu rumah.
+
+Tempat aku bisa jadi versi paling jujur dari diriku, meskipun itu versi yang kadang lemah dan gak sempurna.
+
+Dan kalo kamu baca ini...
+
+Semoga kamu ngerasa cukup.
+Semoga kamu tau... kamu selalu berarti.
+      <p>
+      <p style="text-align:right; font-style:italic; margin-top:25px;">
+        — Yang selalu jatuh cinta sama kamu, diam diam maupun terang terangan 💌
+      </p>
+    </div>
+  `;
+} else if (i === 9) {
+  page.style.backgroundImage = "url('adeeee/hop.jpg')"; // Ganti dengan background diary lucu atau vintage
+  page.style.backgroundSize = "cover";
+  page.style.backgroundPosition = "center";
+  page.innerHTML = `
+    <div class="content" style="text-align:left;">
+    <h2 style="color:#fab1a0; text-align:center;">🌈 Harapan Kecil dari Kakaa buat Kita Berdua</h2>
+    <p style="font-size:16px; line-height:1.6; margin-top:10px;">
+    Aku tau hubungan kita masih muda, masih banyak belajar, masih banyak bercanda... tapi di antara semua itu, kakaa punya harapan-harapan kecil buat kita berdua:
+    </p>
+    <ul style="font-size:16px; line-height:1.8; margin-top:10px;">
+      <li>🫶 Semoga kita tetap bisa saling rangkul, walaupun nanti bisa aja ada masa cape atau bosen.</li>
+      <li>🤍 Semoga kita makin ngerti satu sama lain, bukan malah saling menjauh pas ada salah paham.</li>
+      <li>🤗 Semoga kehadiran kamu selalu jadi tempat ternyaman buat kakaa setelah hari yang berat.</li>
+      <li>😁 Semoga suatu hari nanti, aku bisa jadi cowo yang beneran pantes buat kamu.</li>
+      <li>🌍 Semoga kita bisa jalan bareng ke tempat yang belum pernah kita datangi... bukan cuma tempat, tapi juga masa depan yang belum kita tau.</li>
+      <li>🤏 Dan kalo kita dikasih umur panjang... semoga tangan kecil kamu tetap jadi yang kakaa genggam sampai kapanpun.</li>
+    </ul>
+    <p style="text-align:center; margin-top:20px; font-style:italic; font-size:17px;">
+    Pokoknya, harapan kakaa itu satu: <br> kamu tetap jadi rumah... bukan cuma sekarang, tapi selamanya 💗
+    </p>
+    </div>
+  `;
+} else if (i === 10) {
+  page.style.backgroundImage = "url('adeeee/tutup.jpg')"; // ganti sesuai gambar background kamu
+  page.style.backgroundSize = "cover";
+  page.style.backgroundPosition = "center";
+  page.innerHTML = `
+    <div class="content" style="text-align:center;">
+      <h2 style="color:#6c5ce7;">🎉 Halaman Terakhir, Tapi Bukan Akhir 🎉</h2>
+      <p id="typewriter" style="font-size:16.5px; margin-top:20px; line-height:1.8; font-family:'Segoe UI', sans-serif; text-align:left;"></p>
+    </div>
+  `;
+}
+
+
+  book.appendChild(page);
+}
+
+
+  function nextPage() {
+    if (currentPage < totalPages) {
+      const page = book.children[currentPage];
+      page.classList.add("flipped");
+      currentPage++;
+    }
+  }
+
+  function prevPage() {
+    if (currentPage > 0) {
+      currentPage--;
+      const page = book.children[currentPage];
+      page.classList.remove("flipped");
+    }
+  }
+
+function checkAnswer(button, isCorrect, correctMsg, wrongMsg) {
+  const toast = document.getElementById("toast");
+  toast.innerText = isCorrect ? correctMsg : wrongMsg;
+  toast.style.backgroundColor = isCorrect ? "#28a745" : "#dc3545";
+  toast.style.visibility = "visible";
+  toast.style.opacity = "1";
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.visibility = "hidden";
+  }, 2000);
+}
+
+let galeriIndex = 0;
+const galeriCaptions = [
+  "Sumpah ngakak banget oyyyy 😭",
+  "Etssss pertama kali kita ngobrol niehhhh 🤪",
+  "Pertama kali kita potbar, gugup bangett ihhhh 😔"
+];
+
+function showGaleri(index) {
+  const slides = document.querySelectorAll(".galeri-slide");
+  const caption = document.getElementById("galeri-caption");
+
+  slides.forEach((slide, i) => {
+    slide.style.display = i === index ? "block" : "none";
+  });
+
+  if (caption) caption.innerText = galeriCaptions[index];
+}
+
+function nextGaleri() {
+  const slides = document.querySelectorAll(".galeri-slide");
+  galeriIndex = (galeriIndex + 1) % slides.length;
+  showGaleri(galeriIndex);
+}
+
+function prevGaleri() {
+  const slides = document.querySelectorAll(".galeri-slide");
+  galeriIndex = (galeriIndex - 1 + slides.length) % slides.length;
+  showGaleri(galeriIndex);
+}
+
+setTimeout(() => showGaleri(galeriIndex), 100);
+
+function startTypewriter() {
+  const message = `Terimakasih yaa udah buka halamannya sampe akhir. Kecil, sederhana, tapi kakaa bikin ini pake hati buat adee, hehehe. 
+
+Setiap senyum kamu, setiap ngambek kamu, bahkan setiap diem kamu... semuanya berarti. 
+
+Maaf kalo kadang kakaa belum jadi yang paling peka, belum bisa selalu ngerti isi hati kamu. Tapi kakaa selalu pengen jadi orang yang selalu bisa kamu andelin, kapanpun kamu butuh.
+
+Kakaa sayang kamu. Dan semoga suatu hari nanti, kita bisa lihat ini lagi... sambil senyum senyum bareng, disaat kita udah bersama selamanya. 🤍`;
+
+  let i = 0;
+  const speed = 35;
+  const target = document.getElementById("typewriter");
+  if (!target) return;
+
+  function typeWriter() {
+    if (i < message.length) {
+      target.innerHTML += message.charAt(i) === "\n" ? "<br><br>" : message.charAt(i);
+      i++;
+      setTimeout(typeWriter, speed);
+    }
+  }
+
+  setTimeout(typeWriter, 500);
+}
+
+// Jalankan saat halaman 10 muncul
+const observer = new MutationObserver(() => {
+  const typeEl = document.getElementById("typewriter");
+  if (typeEl && typeEl.innerHTML.trim() === "") {
+    startTypewriter();
+  }
+});
+observer.observe(document.getElementById("book"), { childList: true, subtree: true });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const bgm = document.getElementById("bgm");
+
+  // Coba langsung play
+  bgm.play().catch(() => {
+    // Jika gagal (karena browser), tunggu interaksi
+    document.body.addEventListener("click", () => {
+      bgm.play();
+    }, { once: true });
+  });
+});
+
+</script>
+
+</body>
+</html>
